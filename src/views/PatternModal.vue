@@ -8,7 +8,7 @@
 					label-cols-sm="4"
 					label-cols-lg="3"
 					label="Name"
-					description="It is displayed in the list and highlighted in the packet contents"
+					description="It is displayed in the list and highlights matching content or IP addresses"
 					label-for="pattern-name">
 				<b-form-input @keydown.native.enter="addPattern" id="pattern-name" required v-model="newPattern.name"/>
 			</b-form-group>
@@ -51,10 +51,25 @@
 					v-if="creating"
 					label-cols-sm="4"
 					label-cols-lg="3"
+					label="Search in"
+					description="IP addresses use regular expressions. Use ^ and $ to match the entire address."
+					label-for="pattern-searchTarget">
+				<b-form-select id="pattern-searchTarget" required v-model="newPattern.searchTarget" @change="onSearchTargetChange">
+					<option value="CONTENT">Packet content</option>
+					<option value="SOURCE_IP">Source IP</option>
+					<option value="DESTINATION_IP">Destination IP</option>
+					<option value="EITHER_IP">Either IP address</option>
+				</b-form-select>
+			</b-form-group>
+
+			<b-form-group
+					v-if="creating"
+					label-cols-sm="4"
+					label-cols-lg="3"
 					label="Search method"
 					description="The way to search for patterns in packets"
 					label-for="pattern-searchType">
-				<b-form-select id="pattern-searchType" required v-model="newPattern.searchType">
+				<b-form-select id="pattern-searchType" required v-model="newPattern.searchType" :disabled="newPattern.searchTarget !== 'CONTENT'">
 					<option value="REGEX" selected>Regular expression</option>
 					<option value="SUBSTRING">Substring</option>
 					<option value="SUBBYTES">Bytes</option>
@@ -97,6 +112,7 @@ const defaultPattern = {
 	value: '',
 	color: '#FF7474',
 	searchType: 'SUBSTRING',
+	searchTarget: 'CONTENT',
 	directionType: 'BOTH',
 	actionType: 'FIND',
 	serviceId: null,
@@ -112,6 +128,7 @@ const defaultPattern = {
 				value: String,
 				color: String,
 				searchType: String,
+				searchTarget: String,
 				directionType: String,
 				actionType: String,
 				serviceId: Number,
@@ -145,7 +162,11 @@ const defaultPattern = {
 			},
 		},
 		methods: {
+			onSearchTargetChange(target) {
+				if (target !== 'CONTENT') this.newPattern.searchType = 'REGEX';
+			},
 			getPlaceholder() {
+				if (this.newPattern.searchTarget && this.newPattern.searchTarget !== 'CONTENT') return '^10\\.20\\.30\\.[0-9]+$';
 				if (this.newPattern.searchType === 'REGEX') return '[A-Z0-9]{31}=';
 				else if (this.newPattern.searchType === 'SUBSTRING') return 'HTTP/2';
 				else return 'DEAD BEEF 1337';

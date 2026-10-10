@@ -203,7 +203,7 @@ export default {
 				const currentPort = parseInt(this.$route?.params?.servicePort, 10);
 				if (currentPort && currentPort !== stream.service) return;
 				if (this.$store.state.displayFavoritesOnly || this.$store.state.pause) return;
-				if (this.$route.query.pattern && !stream.foundPatterns.some(e => e.id === this.$route.query.pattern)) {
+				if (this.$route.query.pattern && !(stream.foundPatternsIds || []).includes(Number(this.$route.query.pattern))) {
 					return;
 				}
 

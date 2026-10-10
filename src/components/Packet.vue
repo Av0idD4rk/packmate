@@ -7,6 +7,11 @@
 			<button @click.prevent="copyText" class="btn btn-link">Copy text</button>
 			<button @click.prevent="copyPythonBytes" class="btn btn-link">Copy as Python bytes</button>
 		</div>
+		<div v-if="packet.sourceIp || packet.destinationIp" class="packet-addresses">
+			<span title="Source IP" :style="ipHighlightStyle('SOURCE_IP')">{{ packet.sourceIp || '?' }}</span>
+			&rarr;
+			<span title="Destination IP" :style="ipHighlightStyle('DESTINATION_IP')">{{ packet.destinationIp || '?' }}</span>
+		</div>
 		<p v-if="!this.$store.state.hexdumpMode"
 			 class="pt-2 pb-2 mb-3"
 			 v-html="stringdata"/>
@@ -25,6 +30,8 @@
 				id: Number(),
 				matches: Array(),
 				timestamp: Number(),
+				sourceIp: String(),
+				destinationIp: String(),
 				incoming: Boolean(),
 				ungzipped: Boolean(),
 				webSocketParsed: Boolean(),
@@ -50,6 +57,13 @@
 			},
 		},
 		methods: {
+			ipHighlightStyle(target) {
+				const match = (this.packet.matches || []).find(match => match.searchTarget === target &&
+					this.$store.state.patterns.some(pattern => pattern.id === match.patternId && !pattern.deleted));
+				if (!match) return {};
+				const pattern = this.$store.state.patterns.find(pattern => pattern.id === match.patternId);
+				return {backgroundColor: pattern.color,};
+			},
 			atou(b64) {
 				const text = atob(b64);
 				const length = text.length;
@@ -127,6 +141,7 @@
 				}, {}); // Array to object
 				let offset = 0;
 				this.packet.matches
+					.filter(match => !match.searchTarget || match.searchTarget === 'CONTENT')
 					.filter(match => !patterns[match.patternId].deleted)
 					.sort((a, b) => a.startPosition - b.startPosition)
 					.forEach(match => {
@@ -179,6 +194,11 @@
 </script>
 
 <style scoped>
+	.packet-addresses {
+		font-family: "Ubuntu Mono", "Lucida Console", monospace;
+		overflow-wrap: anywhere;
+	}
+
 	.packet-outgoing {
 		background: var(--response-packet-color);
 		box-shadow: 0 0 5px 5px var(--response-packet-color);

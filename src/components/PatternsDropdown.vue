@@ -18,6 +18,7 @@
 			<s v-else :style="`color: ${pattern.color};`">{{ pattern.name }}</s>:
 
 			<code>{{ getSearchTypeValue(pattern.searchType, pattern.value) }}</code>;
+			<span v-if="pattern.searchTarget && pattern.searchTarget !== 'CONTENT'">{{ getSearchTargetLabel(pattern.searchTarget) }}; </span>
 
       <template v-if="pattern.actionType === 'FIND'">search </template>
       <template v-else>ignore </template>
@@ -89,6 +90,9 @@
 			},
 		},
 		methods: {
+			getSearchTargetLabel(target) {
+				return {SOURCE_IP: 'source IP', DESTINATION_IP: 'destination IP', EITHER_IP: 'either IP address',}[target];
+			},
 			getSearchTypeValue(searchType, value) {
 				if (searchType === 'REGEX') return `/${value}/`;
 				else if (searchType === 'SUBSTRING') return `'${value}'`;
