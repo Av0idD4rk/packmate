@@ -193,7 +193,7 @@ public class StreamService {
 
         for (Packet packet : packets) {
             PatternDirectionType direction = packet.isIncoming() ? PatternDirectionType.INPUT : PatternDirectionType.OUTPUT;
-            final Set<FoundPattern> matches = patternService.findMatches(packet.getContent(), service,
+            final Set<FoundPattern> matches = patternService.findMatches(packet, service,
                     direction, PatternActionType.FIND);
 
             packet.setMatches(matches);
@@ -218,7 +218,7 @@ public class StreamService {
                 continue;
             }
 
-            final Set<FoundPattern> matches = patternService.matchOne(packet.getContent(), pattern);
+            final Set<FoundPattern> matches = patternService.matchOne(packet, pattern);
 
             if (!matches.isEmpty()) {
                 packet.getMatches().addAll(matches);
@@ -234,7 +234,7 @@ public class StreamService {
     private boolean isStreamIgnored(List<Packet> packets, CtfService service) {
         for (Packet packet : packets) {
             PatternDirectionType direction = packet.isIncoming() ? PatternDirectionType.INPUT : PatternDirectionType.OUTPUT;
-            final Set<FoundPattern> matches = patternService.findMatches(packet.getContent(), service,
+            final Set<FoundPattern> matches = patternService.findMatches(packet, service,
                     direction, PatternActionType.IGNORE);
             if (!matches.isEmpty()) {
                 return true;

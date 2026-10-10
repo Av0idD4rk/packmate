@@ -26,6 +26,7 @@ HELP.md
 /nbproject/private/
 /nbbuild/
 /dist/
+__pycache__/
 /nbdist/
 /.nb-gradle/
 

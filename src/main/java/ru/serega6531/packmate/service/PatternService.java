@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.serega6531.packmate.model.CtfService;
 import ru.serega6531.packmate.model.FoundPattern;
 import ru.serega6531.packmate.model.Pattern;
+import ru.serega6531.packmate.model.Packet;
 import ru.serega6531.packmate.model.enums.PatternActionType;
 import ru.serega6531.packmate.model.enums.PatternDirectionType;
 import ru.serega6531.packmate.model.enums.SubscriptionMessageType;
@@ -63,18 +64,18 @@ public class PatternService {
         return patterns.values();
     }
 
-    public Set<FoundPattern> findMatches(byte[] bytes, CtfService service, PatternDirectionType directionType, PatternActionType actionType) {
+    public Set<FoundPattern> findMatches(Packet packet, CtfService service, PatternDirectionType directionType, PatternActionType actionType) {
         final List<Pattern> list = patterns.values().stream()
                 .filter(pattern -> pattern.isEnabled() && !pattern.isDeleted())
                 .filter(p -> p.getServiceId() == null || p.getServiceId().equals(service.getPort()))
                 .filter(p -> p.getActionType() == actionType)
                 .filter(p -> p.getDirectionType() == directionType || p.getDirectionType() == PatternDirectionType.BOTH)
                 .toList();
-        return new PatternMatcher(bytes, list).findMatches();
+        return new PatternMatcher(packet, list).findMatches();
     }
 
-    public Set<FoundPattern> matchOne(byte[] bytes, Pattern pattern) {
-        return new PatternMatcher(bytes, List.of(pattern)).findMatches();
+    public Set<FoundPattern> matchOne(Packet packet, Pattern pattern) {
+        return new PatternMatcher(packet, List.of(pattern)).findMatches();
     }
 
     public void enable(int id, boolean enabled) {

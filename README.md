@@ -13,6 +13,7 @@
   * Подстрока
   * Регулярное выражение
   * Бинарная подстрока
+* Показывает IPv4/IPv6 адреса отправителя и получателя для каждого пакета
 * Умеет автоматически удалять стримы с определенным контентом, которые не нужно отображать
 * Умеет сохранять стримы в избранное и отображать только избранные стримы
 * Работает с несколькими сервисами на разных портах, может отображать стримы для конкретных сервисов и паттернов
@@ -26,6 +27,21 @@
 
 ![Скриншот главного окна](screenshots/Screenshot.png)
 
+## Изменения этого форка
+
+IP-адреса сохраняются вместе с пакетами, возвращаются API и отображаются в
+карточке как `source → destination`.
+
+Старые записи не содержат IP-адресов, поскольку исходная версия их не сохраняла.
+Для восстановления адресов нужно повторно импортировать исходный PCAP.
+Подробности и описание API находятся в
+[docs/IP_ADDRESSES.md](docs/IP_ADDRESSES.md).
+
+В [docs/ARCHITECTURE_REVIEW_RU.md](docs/ARCHITECTURE_REVIEW_RU.md) находится
+ревью готовности к крупным Attack/Defense соревнованиям. Проверочный скрипт для
+неограниченной распаковки GZIP HTTP находится в
+[poc/http_gzip_expansion.py](poc/http_gzip_expansion.py).
+
 ## Быстрый запуск
 Для быстрого запуска Packmate следует использовать [этот стартер](https://gitlab.com/packmate/starter/-/blob/master/README.md).
 
@@ -35,15 +51,15 @@
 ### Клонирование
 Поскольку этот репозиторий содержит фронтенд как git submodule, его необходимо клонировать так:
 ```bash
-git clone --recurse-submodules https://gitlab.com/packmate/Packmate.git
+git clone --recurse-submodules git@github.com:Av0idD4rk/packmate.git
 
 # Или, на старых версиях git
-git clone --recursive https://gitlab.com/packmate/Packmate.git
+git clone --recursive git@github.com:Av0idD4rk/packmate.git
 ```
 
 Если репозиторий уже был склонирован без подмодулей, необходимо выполнить:
 ```bash
-git pull  # Забираем свежую версию мастер-репы из gitlab
+git pull  # Забираем свежую версию master из GitHub
 git submodule update --init --recursive
 ```
 

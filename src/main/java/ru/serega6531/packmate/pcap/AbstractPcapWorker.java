@@ -165,6 +165,8 @@ public abstract class AbstractPcapWorker implements PcapWorker, PacketListener {
                 .tempId(packetIdCounter++)
                 .ttl(ttl)
                 .timestamp(time)
+                .sourceIp(sourceIp.getHostAddress())
+                .destinationIp(destIp.getHostAddress())
                 .incoming(incoming)
                 .content(content)
                 .build();

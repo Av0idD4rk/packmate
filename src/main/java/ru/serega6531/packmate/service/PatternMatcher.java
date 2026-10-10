@@ -4,6 +4,9 @@ import lombok.SneakyThrows;
 import org.springframework.security.crypto.codec.Hex;
 import ru.serega6531.packmate.model.FoundPattern;
 import ru.serega6531.packmate.model.Pattern;
+import ru.serega6531.packmate.model.Packet;
+import ru.serega6531.packmate.model.enums.PatternSearchTarget;
+import ru.serega6531.packmate.model.enums.PatternSearchType;
 import ru.serega6531.packmate.utils.KMPByteSearcher;
 import ru.serega6531.packmate.utils.KMPStringSearcher;
 
@@ -22,13 +25,25 @@ public class PatternMatcher {
     private final byte[] contentBytes;
     private final String content;
     private final List<Pattern> patterns;
+    private final String sourceIp;
+    private final String destinationIp;
 
     private final Set<FoundPattern> result = new HashSet<>();
 
     public PatternMatcher(byte[] contentBytes, List<Pattern> patterns) {
+        this(contentBytes, null, null, patterns);
+    }
+
+    public PatternMatcher(Packet packet, List<Pattern> patterns) {
+        this(packet.getContent(), packet.getSourceIp(), packet.getDestinationIp(), patterns);
+    }
+
+    private PatternMatcher(byte[] contentBytes, String sourceIp, String destinationIp, List<Pattern> patterns) {
         this.contentBytes = contentBytes;
         this.content = new String(contentBytes);
         this.patterns = patterns;
+        this.sourceIp = sourceIp;
+        this.destinationIp = destinationIp;
     }
 
     public Set<FoundPattern> findMatches() {
@@ -37,10 +52,42 @@ public class PatternMatcher {
     }
 
     private void match(Pattern pattern) {
+        if (pattern.getSearchTarget() != PatternSearchTarget.CONTENT) {
+            matchIpAddresses(pattern);
+            return;
+        }
         switch (pattern.getSearchType()) {
             case REGEX -> matchRegex(pattern);
             case SUBSTRING -> matchSubstring(pattern);
             case SUBBYTES -> matchSubbytes(pattern);
+        }
+    }
+
+    private void matchIpAddresses(Pattern pattern) {
+        requireIpRegex(pattern);
+        if (pattern.getSearchTarget() != PatternSearchTarget.DESTINATION_IP) {
+            matchIp(pattern, sourceIp, PatternSearchTarget.SOURCE_IP);
+        }
+        if (pattern.getSearchTarget() != PatternSearchTarget.SOURCE_IP) {
+            matchIp(pattern, destinationIp, PatternSearchTarget.DESTINATION_IP);
+        }
+    }
+
+    private void matchIp(Pattern pattern, String address, PatternSearchTarget target) {
+        if (address != null && !address.isEmpty() && compileRegex(pattern).matcher(address).find()) {
+            // An address match marks the endpoint, never a range in the payload.
+            result.add(FoundPattern.builder()
+                    .patternId(pattern.getId())
+                    .searchTarget(target)
+                    .startPosition(0)
+                    .endPosition(address.length() - 1)
+                    .build());
+        }
+    }
+
+    private static void requireIpRegex(Pattern pattern) {
+        if (pattern.getSearchTarget() != PatternSearchTarget.CONTENT && pattern.getSearchType() != PatternSearchType.REGEX) {
+            throw new IllegalArgumentException("IP address patterns must use regular expressions");
         }
     }
 
@@ -105,7 +152,7 @@ public class PatternMatcher {
     }
 
     private void addIfPossible(FoundPattern found) {
-        if (result.stream().noneMatch(match ->
+        if (result.stream().filter(match -> match.getSearchTarget() == found.getSearchTarget()).noneMatch(match ->
                 between(match.getStartPosition(), match.getEndPosition(), found.getStartPosition()) ||
                         between(match.getStartPosition(), match.getEndPosition(), found.getEndPosition()))) {
             result.add(found);
@@ -117,6 +164,7 @@ public class PatternMatcher {
     }
 
     static void compilePattern(Pattern pattern) {
+        requireIpRegex(pattern);
         switch (pattern.getSearchType()) {
             case REGEX -> compileRegex(pattern);
             case SUBSTRING -> compileStringKMP(pattern);

@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import ru.serega6531.packmate.model.enums.PatternSearchTarget;
 
 import jakarta.persistence.*;
 import java.util.Objects;
@@ -37,6 +38,13 @@ public class FoundPattern {
     private Packet packet;
 
     private int patternId;
+
+    @Enumerated(EnumType.STRING)
+    private PatternSearchTarget searchTarget;
+
+    public PatternSearchTarget getSearchTarget() {
+        return searchTarget == null ? PatternSearchTarget.CONTENT : searchTarget;
+    }
 
     private int startPosition;
 

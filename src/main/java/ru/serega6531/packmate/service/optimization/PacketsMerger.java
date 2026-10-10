@@ -47,11 +47,15 @@ public class PacketsMerger {
         final boolean webSocketParsed = cut.stream().anyMatch(Packet::isWebSocketParsed);
         final boolean tlsDecrypted = cut.get(0).isTlsDecrypted();
         final boolean incoming = cut.get(0).isIncoming();
+        final String sourceIp = cut.get(0).getSourceIp();
+        final String destinationIp = cut.get(0).getDestinationIp();
         final byte[] content = PacketUtils.mergePackets(cut);
 
         packets.removeAll(cut);
         packets.add(start, Packet.builder()
                 .incoming(incoming)
+                .sourceIp(sourceIp)
+                .destinationIp(destinationIp)
                 .timestamp(timestamp)
                 .httpProcessed(httpProcessed)
                 .webSocketParsed(webSocketParsed)

@@ -3,6 +3,7 @@ package ru.serega6531.packmate.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import org.hibernate.annotations.Parameter;
 import ru.serega6531.packmate.model.enums.PatternActionType;
 import ru.serega6531.packmate.model.enums.PatternDirectionType;
 import ru.serega6531.packmate.model.enums.PatternSearchType;
+import ru.serega6531.packmate.model.enums.PatternSearchTarget;
 
 import java.util.Objects;
 
@@ -56,6 +58,13 @@ public class Pattern {
     @Enumerated
     @Column(nullable = false)
     private PatternSearchType searchType;
+
+    @Enumerated(EnumType.STRING)
+    private PatternSearchTarget searchTarget = PatternSearchTarget.CONTENT;
+
+    public PatternSearchTarget getSearchTarget() {
+        return searchTarget == null ? PatternSearchTarget.CONTENT : searchTarget;
+    }
 
     @Enumerated
     @Column(nullable = false)

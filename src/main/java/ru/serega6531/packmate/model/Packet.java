@@ -47,6 +47,10 @@ public class Packet {
 
     private long timestamp;
 
+    private String sourceIp;
+
+    private String destinationIp;
+
     private boolean incoming; // true если от клиента к серверу, иначе false
 
     private boolean httpProcessed = false;

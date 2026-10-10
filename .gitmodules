@@ -1,3 +1,4 @@
 [submodule "frontend"]
 	path = frontend
-	url = https://gitlab.com/packmate/packmate-frontend.git
+	url = git@github.com:Av0idD4rk/packmate.git
+	branch = frontend
